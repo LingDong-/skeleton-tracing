@@ -1,0 +1,216 @@
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+  <h2>Skeleton Tracing Demo</h2>
+<select id="sel">
+  <option value="1">Single Image</option>
+  <option value="2">Webcam</option>
+  <option value="3">Random CJK</option>
+  <option value="4">Freehand</option>
+</select>
+</body>
+<script src="wasm/dist/trace_skeleton.js"></script>
+<script defer>
+var TOP = 100;
+
+var canv = document.createElement("canvas");
+var ctx = canv.getContext('2d');
+canv.style = `position:absolute;left:0px;top:${TOP}px;transform:scale(2);transform-origin:0 0;`;
+document.body.appendChild(canv);
+
+var div = document.createElement("div");
+div.style = `position:absolute;left:0px;top:${TOP}px;pointer-events:none`;
+document.body.appendChild(div)
+
+var animReq;
+
+function fromImageUrl(url){
+  var img = new Image();
+  img.src = url;
+  
+  img.onload = function(){
+    canv.width = img.width;
+    canv.height = img.height;
+    
+    ctx.drawImage(img,0,0);
+    var s = TraceSkeleton.fromCanvas(canv);
+    var r = s.rects;
+    var p = s.polylines;
+    var v = TraceSkeleton.visualize(s,{scale:2,strokeWidth:3});
+    
+    div.innerHTML = v;
+  
+  }
+}
+
+function fromWebcam(){
+  var vid = document.createElement("video");
+  vid.playsinline="playsinline"
+  vid.autoplay="autoplay"
+  navigator.mediaDevices.getUserMedia({audio:false,video:true}).then(function(stream){
+    window.stream = stream;
+    vid.srcObject = stream;
+  })
+  vid.style.position="absolute"
+  vid.style.opacity=0;
+  vid.style.pointerEvents="none";
+  vid.style.zIndex = -1000;
+  canv.width = vid.videoWidth = 360;
+  canv.height = vid.videoHeight = 240;
+  ctx.filter = "blur(5px)";
+
+  document.body.appendChild(vid);
+
+  function loop(){
+    animReq = requestAnimationFrame(loop);
+    // setTimeout(loop,1000);
+
+    ctx.drawImage(vid,0,0,canv.width,canv.height);
+
+    var imdata = ctx.getImageData(0,0,canv.width,canv.height);
+    var data = imdata.data;
+    var str = "";
+    for (var i = 0; i < data.length; i+=4){
+      var g = 255;
+      var c = (data[i]+data[i+1]+data[i+2])/3;
+      var x = (i/4)%canv.width;
+      var y = Math.floor((i/4)/canv.width);
+      var d = 1-Math.sqrt(Math.pow(x-canv.width/2,2)+Math.pow(y-canv.height/2,2))/((canv.width+canv.height)/0.75);
+
+      if (d*c > 128){
+        str += "\1";
+      }else{
+        str += "\0";
+        g = 0;
+      }
+
+      data[i]=g;
+      data[i+1]=g;
+      data[i+2]=g;
+    }
+    ctx.putImageData(imdata,0,0);
+
+    var s = TraceSkeleton.fromCharString(str,canv.width,canv.height);
+    // console.log(s)
+    var v = TraceSkeleton.visualize(s,{scale:2,strokeWidth:3,keypoints:true});
+    div.innerHTML = v;
+    
+  }
+  loop();
+
+}
+
+
+function fromUnicode(){
+
+  canv.width = 270;
+  canv.height = 150;
+  var t1 = ""; var t2 = "";
+
+  function ct1(){
+    setTimeout(ct1,1)
+    t1 = String.fromCharCode(0x4e00+Math.floor(Math.random()*(0x9fff-0x4e00)));
+  }
+  function ct2(){
+    setTimeout(ct2,1000);
+    t2 = String.fromCharCode(0x4e00+Math.floor(Math.random()*(0x9fff-0x4e00)));
+  }
+
+  ct1();
+  ct2();
+
+  function loop(){
+    animReq = requestAnimationFrame(loop);
+    ctx.fillStyle="black";
+    ctx.fillRect(0,0,300,300);
+    ctx.fillStyle="white"
+    if (Math.random)
+    ctx.font="160px Kaiti TC";
+    ctx.fillText(t1,0,120);
+    ctx.fillText(t2,105,120);
+
+    var imdata = ctx.getImageData(0,0,canv.width,canv.height);
+    var data = imdata.data;
+    var str = "";
+    for (var i = 0; i < data.length; i+=4){
+      if (data[i] > 128){
+        str += "\1";
+      }else{
+        str += "\0";
+      }
+    }
+
+    var s = TraceSkeleton.fromCharString(str,canv.width,canv.height);
+    // console.log(s)
+    var v = TraceSkeleton.visualize(s,{scale:2,strokeWidth:3,keypoints:true});
+    div.innerHTML = v;
+    
+  }
+  loop();
+}
+
+
+function fromDrawing(){
+  canv.width = 200;
+  canv.height = 200;
+  var mouseX =0;
+  var mouseY =0;
+  var pmouseX=0;
+  var pmouseY=0;
+  canv.addEventListener("mousemove",function(e){
+    pmouseX = mouseX;
+    pmouseY = mouseY;
+    mouseX = (e.clientX-canv.offsetLeft)/2;
+    mouseY = (e.clientY-canv.offsetTop)/2;
+  })
+  ctx.fillRect(0,0,canv.width,canv.height);
+  function loop(){
+    animReq = requestAnimationFrame(loop);
+    ctx.strokeStyle="white";
+    ctx.lineWidth=Math.min(Math.max(Math.sqrt(Math.pow(pmouseX-mouseX,2)+Math.pow(pmouseY-mouseY,2))*1,2),10);
+    ctx.lineCap="round"
+    ctx.beginPath();
+    ctx.moveTo(pmouseX,pmouseY);
+    ctx.lineTo(mouseX,mouseY);
+    ctx.stroke();
+
+    var imdata = ctx.getImageData(0,0,canv.width,canv.height);
+    var data = imdata.data;
+    var str = "";
+    for (var i = 0; i < data.length; i+=4){
+      if (data[i] > 128){
+        str += "\1";
+      }else{
+        str += "\0";
+      }
+    }
+    var s = TraceSkeleton.fromCharString(str,canv.width,canv.height);
+    var v = TraceSkeleton.visualize(s,{scale:2,strokeWidth:3,keypoints:true});
+    div.innerHTML = v;
+
+    
+  }
+  loop();
+}
+
+
+TraceSkeleton.onload(function(){
+  // fromDrawing();
+  fromImageUrl("test_images/opencv-thinning-src-img.png")
+  document.getElementById("sel").onchange = function(){
+    cancelAnimationFrame(animReq);
+
+    var v = document.getElementById("sel").value;
+    if (v=="1"){
+      fromImageUrl("test_images/opencv-thinning-src-img.png")
+    }else if (v=="2"){
+      fromWebcam();
+    }else if (v=="3"){
+      fromUnicode();
+    }else if (v==4){
+      fromDrawing();
+    }
+  }
+})
+</script>

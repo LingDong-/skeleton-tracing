@@ -1,0 +1,5 @@
+interface skeleton_tracer_t {
+  void skeleton_tracer_t();
+  DOMString trace(DOMString img, long w, long h);
+  void destroy();
+};
