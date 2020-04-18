@@ -71,7 +71,7 @@ var TraceSkeleton = new function (){var that = this;
     if (kpt){
       for (var i = 0; i < p.length; i++){
         for (var j = 0; j < p[i].length; j++){
-          svg += `<rect fill="none" stroke="red" x="${p[i][j][0]*s-1}" y="${p[i][j][1]*s-1}" width="2" height="2"/>`
+          svg += `<rect fill="none" stroke="red" x="${p[i][j][0]*s-5}" y="${p[i][j][1]*s-5}" width="10" height="10"/>`
         }
       }
     }

@@ -37,7 +37,7 @@ function fromImageUrl(url){
     var s = TraceSkeleton.fromCanvas(canv);
     var r = s.rects;
     var p = s.polylines;
-    var v = TraceSkeleton.visualize(s,{scale:2,strokeWidth:3});
+    var v = TraceSkeleton.visualize(s,{scale:2,strokeWidth:8});
     
     div.innerHTML = v;
   
@@ -197,7 +197,7 @@ function fromDrawing(){
 
 TraceSkeleton.onload(function(){
   // fromDrawing();
-  fromImageUrl("test_images/opencv-thinning-src-img.png")
+  fromImageUrl("test_images/horse_r.png")
   document.getElementById("sel").onchange = function(){
     cancelAnimationFrame(animReq);
 

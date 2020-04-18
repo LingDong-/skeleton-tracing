@@ -696,9 +696,9 @@ struct skeleton_tracer_t {
     arg->h = H;
     arg->iter = 0;
 
-    // print_bitmap();
+    print_bitmap();
     thinning_zs();
-    // print_bitmap();
+    print_bitmap();
     
     polyline_t* p = (polyline_t*)trace_skeleton((void*)arg);
     std::string str = "POLYLINES:\n"+print_polylines(p)+"RECTS:\n"+print_rects();
