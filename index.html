@@ -78,7 +78,9 @@ function fromWebcam(){
       var x = (i/4)%canv.width;
       var y = Math.floor((i/4)/canv.width);
       var d = 1-Math.sqrt(Math.pow(x-canv.width/2,2)+Math.pow(y-canv.height/2,2))/((canv.width+canv.height)/0.75);
-
+      if (x<1||x>canv.width-2||y<1||y>canv.width-2){
+        d=0;
+      }
       if (d*c > 128){
         str += "\1";
       }else{
@@ -169,7 +171,8 @@ function fromDrawing(){
   function loop(){
     animReq = requestAnimationFrame(loop);
     ctx.strokeStyle="white";
-    ctx.lineWidth=Math.min(Math.max(Math.sqrt(Math.pow(pmouseX-mouseX,2)+Math.pow(pmouseY-mouseY,2))*1,2),10);
+    // ctx.lineWidth=Math.min(Math.max(Math.sqrt(Math.pow(pmouseX-mouseX,2)+Math.pow(pmouseY-mouseY,2))*1,2),10);
+    ctx.lineWidth=10;
     ctx.lineCap="round"
     ctx.beginPath();
     ctx.moveTo(pmouseX,pmouseY);
@@ -180,6 +183,12 @@ function fromDrawing(){
     var data = imdata.data;
     var str = "";
     for (var i = 0; i < data.length; i+=4){
+      var x = (i/4)%canv.width;
+      var y = Math.floor((i/4)/canv.width);
+      if (x<1||x>canv.width-2||y<1||y>canv.width-2){
+        str+="\0";
+        continue;
+      }
       if (data[i] > 128){
         str += "\1";
       }else{
