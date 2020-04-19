@@ -9,6 +9,8 @@
 
 ![](https://user-images.githubusercontent.com/7929704/79626790-c39c3980-8100-11ea-82c8-3da4380c1128.png)
 
+<sub>[About the Chinese characters in the test image](./test_images/README.md#paoding)</sub>
+
 ## Introduction
 
 Traditionally, skeletonization (thinning) is a morphological operation to reduce a binary image to its topological skeleton, returning a raster image as result. However, sometimes a vector representation (e.g. polylines) is more desirable. Though contour-finding can be used to further trace the results, they usually give enclosing outlines instead of single strokes, and are prone to slight variations in stroke width caused by imperfection in the skeletonization process. In this demo we present a parallelizable divide-and-conquer based algorithm for skeleton tracing, which converts binary images into a set of polylines, i.e. arrays of (x,y) coordinates along the skeleton, in real time.
