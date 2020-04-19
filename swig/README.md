@@ -8,7 +8,7 @@ The following functions take in an image representation and return set of polyli
 
 - `trace_skeleton.from_numpy(arr)` input numpy array
 - `trace_skeleton.from_list(arr,w,h)` input flat python list and width and height
-- `trace_skeleton.from_list(arr)` input python list of list
+- `trace_skeleton.from_list2d(arr)` input python list of list
 
 
 ## Example
