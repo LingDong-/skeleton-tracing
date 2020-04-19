@@ -1,8 +1,8 @@
 # trace_skeleton.vanilla.js
 
-The slow, vanilla JavaScript implementation, just for reference.
+The vanilla JavaScript implementation.
 
-**See `../wasm` for the fast WebAssembly version compiled from C++ with emscripten!**
+**See `../wasm` for the WebAssembly version compiled from C++ with emscripten!**
 
 
 API is identitcal to `../wasm` version for "swapping in".
