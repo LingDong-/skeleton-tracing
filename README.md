@@ -2,9 +2,9 @@
 
 *A new algorithm for retrieving topological skeleton as a set of polylines from binary images.*
 
-Available in all your favorite languages: C, C++, Java, JavaScript, Python, C#/Unity, Processing, OpenFrameworks.
+[Available in all your favorite languages](#impl): C, C++, Java, JavaScript, Python, C#/Unity, Processing, OpenFrameworks.
 
-![Snip20200417_41](https://user-images.githubusercontent.com/7929704/79626790-c39c3980-8100-11ea-82c8-3da4380c1128.png)
+![](https://user-images.githubusercontent.com/7929704/79626790-c39c3980-8100-11ea-82c8-3da4380c1128.png)
 
 ## Introduction
 
@@ -33,7 +33,7 @@ Define a binary image to be a 2D matrix consisting of 0-pixels(background) and 1
 	- If there are 3 or more outgoing pixels, it is likely that the area holds an itersection, or "crossroad". We do a convolution on the matrix to find the 3x3 submatrix that contains the most 1-pixels. Set the center of all the segments to the center of the 3x3 submatrix and return.
 	- If there are only 1 outgoing pixels, return the segment that connects it and the center of the image section.
  
- 
+<a name="impl"></a>
 ## Implementations
  
 Click on links below to see each implementation's documnetation and code.
