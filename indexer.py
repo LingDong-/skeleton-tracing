@@ -22,14 +22,14 @@ for r,ds,fs in os.walk("./"):
 	if "index.html" in fs:
 		continue
 	print(r)
-	html = "<html><style>"+style+"</style><h1>"+r+"</h1><table><tr><td>🔙</td><td><a href=\""+"/".join(r.split("/")[0:-1])+"\">../</a></td></tr>"
+	html = "<html><style>"+style+"</style><h1>"+r+"</h1><table><tr><td>🔙</td><td><a href=\"../\">../</a></td></tr>"
 
 	for d in ds:
-		html += "<tr><td>📁</td><td><a href=\""+r+"/"+d+"\">"+d+"/</a></td></tr>"
+		html += "<tr><td>📁</td><td><a href=\""+d+"\">"+d+"/</a></td></tr>"
 	for f in fs:
 		if f[0] == ".":
 			continue
-		html += "<tr><td>📄</td><td><a href=\""+r+"/"+f+"\">"+f+"</a></td></tr>"
+		html += "<tr><td>📄</td><td><a href=\""+f+"\">"+f+"</a></td></tr>"
 	html+="</table>"
 	if "README.md" in fs:
 		t = re.sub(r'\[(.*?)\]\((.*?)\)',r'<a href="\2">\1</a>',
