@@ -28,18 +28,18 @@ Define a binary image to be a 2D matrix consisting of 0-pixels(background) and 1
 5. Check if either of the 2 submatrices is empty (i.e. all 0-pixels). For each non-empty submatrix, recursively process it by going to step 2.
 6. Merge the result from the 2 submatrices, and return the combined set of polylines.
 	- For each polylines from one submatrix whose either endpoint coincide with the splitting row or column, find another polyline in the other submatrix whose endpoint meets it. If the matrix was split horizontally, then the x-coordinate of the endpoints should differ by exactly 1, and y-coordinate can differ between 0 to about 4 (depending on the steepness of the stroke potrayed), The reverse goes for vertical splitting.
-7. Recrusive bottom. Walk around the 4 edges of this small matrix in either clockwise or ant-clockwise order inspecting the border pixels.
+7. Recursive bottom. Walk around the 4 edges of this small matrix in either clockwise or ant-clockwise order inspecting the border pixels.
 	- Initially set a flag to false, and whenever a 1-pixel is encountered whilst the flag is false, set the flag to true, and push the coordinate of the 1-pixel to a stack. 
 	- Whenever a 0-pixel is encountered whilst the flag is true, pop the last coordinate from the stack, and push the midpoint between it and the current coordinate. Then set the flag to false.
 	- After all border pixels are visited, the stack now holds coordinates for all the "outgoing" (or "incoming") pixels from this small image section. By connecting these coordinates with the center coordinate of the image section, an estimated vectorized representation of the skeleton in this area if formed by these line segments. We further improve the estimate using the following heuristics:
 	- If there are exactly 2 outgoing pixels. It is likely that the area holds a straight line. We return a single segment connecting these 2 pixels.
-	- If there are 3 or more outgoing pixels, it is likely that the area holds an itersection, or "crossroad". We do a convolution on the matrix to find the 3x3 submatrix that contains the most 1-pixels. Set the center of all the segments to the center of the 3x3 submatrix and return.
+	- If there are 3 or more outgoing pixels, it is likely that the area holds an intersection, or "crossroad". We do a convolution on the matrix to find the 3x3 submatrix that contains the most 1-pixels. Set the center of all the segments to the center of the 3x3 submatrix and return.
 	- If there are only 1 outgoing pixels, return the segment that connects it and the center of the image section.
  
 <a name="impl"></a>
 ## Implementations
  
-Click on links below to see each implementation's documnetation and code.
+Click on links below to see each implementation's documentation and code.
  
 - [**C99**](c) (parallelized with pthreads, libpng for reading and X11 for display)
 - [**C++**](cpp) (thinly wrapped from C version)
@@ -47,7 +47,7 @@ Click on links below to see each implementation's documnetation and code.
 - [**Vanilla JS**](js) (Pure JavaScript implementation)
 - [**Pure Python**](py) (slow)
 - [**Python using C API**](swig) (compiled from C using SWIG, compatible with numpy and opencv)
-- [**Java**](java) (inlcudes a Processing demo)
+- [**Java**](java) (includes a Processing demo)
 - [**OpenFrameworks addon**](of) (friendly wrapper on C++ version)
 - [**C#**](cs) (demo script for Unity Engine)
  
