@@ -10,7 +10,8 @@
   <option value="4">Freehand</option>
 </select>
 </body>
-<script src="wasm/dist/trace_skeleton.js"></script>
+<!-- <script src="wasm/dist/trace_skeleton.js"></script> -->
+<script src="js/trace_skeleton.vanilla.js"></script>
 <script defer>
 var TOP = 100;
 
@@ -37,7 +38,7 @@ function fromImageUrl(url){
     var s = TraceSkeleton.fromCanvas(canv);
     var r = s.rects;
     var p = s.polylines;
-    var v = TraceSkeleton.visualize(s,{scale:2,strokeWidth:8});
+    var v = TraceSkeleton.visualize(s,{scale:2,strokeWidth:2});
     
     div.innerHTML = v;
   
