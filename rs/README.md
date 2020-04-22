@@ -24,24 +24,25 @@ let svg : String = trace_skeleton::polylines_to_svg(&p,w,h);
 ```
 
 
-## Compile
+## Testing the example
 
-First compile
+The example uses the rust image crate.
+
+```bash
+cargo new example
+cp example.rs example/src/main.rs
+cp trace_skeleton.rs example/src/trace_skeleton.rs
+echo "image=\"0.23.4\"" >> example/Cargo.toml
+cd example
+cargo build --release
+```
+
+Run it
 
 ```
-rustc -O example.rs
-```
-
-Then run
-
-```
-./example img.txt
+./target/release/example path/to/image.png
 ```
 
 Output will be written to `out.svg`
-
-- `-O` should be passed to the compiler to gain a ~100x speedup.
-- `img.txt` is an text file filled with "0" and "1" representing a bitmap image.
-
 
 **Developed at [Frank-Ratchye STUDIO for Creative Inquiry](https://studioforcreativeinquiry.org) at Carnegie Mellon University.**

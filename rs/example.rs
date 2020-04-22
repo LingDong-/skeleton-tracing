@@ -1,29 +1,32 @@
+/*
+
+[dependencies]
+image = "0.23.4"
+
+*/
+
+extern crate image;
+
 mod trace_skeleton; pub use trace_skeleton::*;
 
-fn read_txt_as_image(path:String) -> (Vec<u8>,usize,usize){
-    let txt = std::fs::read_to_string(path).expect("Unable to read file");
-    let bts = txt.as_bytes();
-    let mut im : Vec<u8> = vec![];
-    let mut w : usize = 0;
-    let mut h : usize = 1;
-    for i in 0..bts.len(){
-        if bts[i] == 48{
-            im.push(0);
-            w+=1;
-        }else if bts[i] == 49{
-            im.push(1);
-            w+=1;
-        }else if bts[i] == 10{
-            h+=1;
-            w=0;
+fn read_image(path:String) -> (Vec<u8>,usize,usize){
+    let img = image::open(path).unwrap().to_luma();
+    let (w,h) = img.dimensions();
+    let mut im = img.into_raw();
+    for i in 0..h*w{
+        if im[i as usize]>128 {
+            im[i as usize] = 1
+        }else{
+            im[i as usize] = 0
         }
     }
-    return (im,w,h);
+    return (im,w as usize,h as usize);
 }
 
 fn main(){
     let argv: Vec<_> = std::env::args().collect();
-    let (mut im,w,h) = read_txt_as_image(argv[1].clone());
+
+    let (mut im,w,h) = read_image(argv[1].clone());
     
     trace_skeleton::thinning_zs(&mut im,w,h);
 
