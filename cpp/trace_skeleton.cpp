@@ -158,7 +158,7 @@ struct skeleton_tracer_t {
       return;
     }
     if (!q0){
-      q0 = new_polyline();
+      *q0 = *new_polyline();
     }
     if (!q0->head){
       q0->head = q1->head;
@@ -176,7 +176,7 @@ struct skeleton_tracer_t {
       return;
     }
     if (!q0){
-      q0 = new_polyline();
+      *q0 = *new_polyline();
     }
     if (!q1->head){
       return;

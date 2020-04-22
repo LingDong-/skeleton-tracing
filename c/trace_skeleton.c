@@ -167,7 +167,7 @@ void cat_tail_polyline(polyline_t* q0, polyline_t* q1){
     return;
   }
   if (!q0){
-    q0 = new_polyline();
+    *q0 = *new_polyline();
   }
   if (!q0->head){
     q0->head = q1->head;
@@ -185,7 +185,7 @@ void cat_head_polyline(polyline_t* q0, polyline_t* q1){
     return;
   }
   if (!q0){
-    q0 = new_polyline();
+    *q0 = *new_polyline();
   }
   if (!q1->head){
     return;

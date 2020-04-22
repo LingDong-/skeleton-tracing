@@ -103,7 +103,7 @@ func catTailPolyline(q0 *polyline_t, q1 *polyline_t) {
         return
     }
     if (q0==nil){
-        q0 = newPolyline()
+        *q0 = *newPolyline()
     }
     if (q0.head==nil){
         q0.head = q1.head
@@ -121,7 +121,7 @@ func catHeadPolyline(q0 *polyline_t, q1 *polyline_t) {
         return
     }
     if (q0==nil){
-        q0 = newPolyline()
+        *q0 = *newPolyline()
     }
     if (q1.head==nil){
         return
