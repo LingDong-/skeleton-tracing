@@ -18,7 +18,12 @@ All source code is in `src/traceskeleton/traceskeleton.go`
 export GO_PATH=$PWD; go build example.go
 ```
 
-**Note:** This is my "Hello World" in Go, feel free to PR if you feel something could be done more idiomatically!
+Test the example:
 
+```
+./example path/to/image.png
+```
+
+Output will be saved as `out.svg`.
 
 **Developed at [Frank-Ratchye STUDIO for Creative Inquiry](https://studioforcreativeinquiry.org) at Carnegie Mellon University.**
