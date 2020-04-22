@@ -1,4 +1,4 @@
-# traceskeleton.swfit
+# trace_skeleton.swfit
 
 Swift version. Tested with Swift 4 and 5 on macOS 10.14.
 

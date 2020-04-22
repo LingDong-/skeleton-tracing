@@ -1,6 +1,6 @@
 
 const HORIZONTAL : u8 =1;
-const VERTICAL   : u8 =0;
+const VERTICAL   : u8 =2;
 
 
 //================================
