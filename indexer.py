@@ -32,8 +32,8 @@ for r,ds,fs in os.walk("./"):
 		html += "<tr><td>📄</td><td><a href=\""+f+"\">"+f+"</a></td></tr>"
 	html+="</table>"
 	if "README.md" in fs:
-		t = re.sub(r'\[(.*?)\]\((.*?)\)',r'<a href="\2">\1</a>',
-			re.sub(r'!\[.*?\]\((.*?)\)',r'<img src="\1" width="300"></img>',
+		t = re.sub(r'\[([^\[\n]*?)\]\((.*?)\)',r'<a href="\2">\1</a>',
+			re.sub(r'!\[[^\[\n]*?\]\((.*?)\)',r'<img src="\1" width="300"></img>',
 				open(r+"/"+"README.md",'r').read().replace("\n","<br>")))
 		html+='<h2>📖 README.md</h2><div style="font-family:monospace">'+t+"</div>";
 	html += "</html>"
