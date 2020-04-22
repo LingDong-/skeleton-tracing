@@ -2,7 +2,7 @@
 
 *A new algorithm for retrieving topological skeleton as a set of polylines from binary images.*
 
-[Available in all your favorite languages](#impl): C, C++, Java, JavaScript, Python, C#/Unity, Processing, OpenFrameworks.
+[Available in all your favorite languages](#impl): C, C++, Java, JavaScript, Python, Go, C#/Unity, Processing, OpenFrameworks.
 
 **[[Online Demo](https://skeleton-tracing.netlify.app)]**
 
@@ -52,6 +52,7 @@ Click on links below to see each implementation's documentation and code.
 - [**Java**](java) (includes a Processing demo)
 - [**OpenFrameworks addon**](of) (friendly wrapper on C++ version)
 - [**C#**](cs) (demo script for Unity Engine)
+- [**Go**](go) (parallelized with goroutines)
  
  
 **Developed at [Frank-Ratchye STUDIO for Creative Inquiry](https://studioforcreativeinquiry.org) at Carnegie Mellon University.**
