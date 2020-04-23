@@ -1,4 +1,4 @@
-# ofxSkeleton
+# ofxTraceSkeleton
 
 The OpenFrameworks addon.
 
@@ -7,9 +7,9 @@ The OpenFrameworks addon.
 
 ## Install
 
-Simply copy the `ofxSkeleton` folder to your `addons` folder. No dependencies!
+Simply copy the `ofxTraceSkeleton` folder to your `addons` folder. No dependencies!
 
 
 ## Usage
 
-See `ofxSkeleton/example` for a detailed usage example.
+See `ofxTraceSkeleton/example` for a detailed usage example.
