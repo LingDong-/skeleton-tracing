@@ -4,11 +4,25 @@
 // Lingdong Huang 2020
 //
 // dependencies:
-// X11, libpng
+// libpng, X11 (Optional)
 // compile:
-// gcc trace_skeleton.c -I /opt/X11/include -L/opt/X11/lib -lX11 -lpng -lm -lpthread -std=c99
+// gcc trace_skeleton.c -O3 -I /opt/X11/include -L/opt/X11/lib -lX11 -lpng -lm -lpthread -std=c99
 // use:
 // ./a.out path/to/image.png > output.txt
+
+//================================
+// PARAMS
+//================================
+#define VIEW_SCALE 3            // scale the displayed result
+#define CHUNK_SIZE 10           // the chunk size
+#define SHOW_GUI 1              // display result with gui
+#define SAVE_RECTS 1            // additionally save bounding rects of chunks (for visualization)
+#define TEST_SPEED 1000         // run a speed comparison between sequential & parallel
+#define MAX_ITER 999            // maximum number of iterations
+
+//================================
+// INCLUDES
+//================================
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -19,9 +33,11 @@
 #include <pthread.h>
 #include <time.h>
 
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/Xos.h>
+#if SHOW_GUI
+  #include <X11/Xlib.h>
+  #include <X11/Xutil.h>
+  #include <X11/Xos.h>
+#endif
 
 #include <png.h>
 
@@ -30,18 +46,6 @@
 //================================
 #define HORIZONTAL 1
 #define VERTICAL 2
-
-//================================
-// PARAMS
-//================================
-#define VIEW_SCALE 3            // scale the displayed result
-#define CHUNK_SIZE 10           // the chunk size
-#define USE_THREAD 0            // use multithreading
-#define SHOW_GUI 0              // display result with gui
-#define SAVE_RECTS 1            // additionally save bounding rects of chunks (for visualization)
-#define TEST_SPEED 0            // run a speed comparison between sequential & parallel
-#define MAX_ITER 999            // maximum number of iterations
-#define MAX_THREADED_ITER 4     // maximum number of iterations that spawn new threads
 
 //================================
 // GLOBALS
@@ -71,19 +75,20 @@ typedef struct _polyline_t {
   int size;
 } polyline_t;
 
+#if SAVE_RECTS
+  typedef struct _rect_t {
+    int x;
+    int y;
+    int w;
+    int h;
+    struct _rect_t* next;
+  } rect_t;
 
-typedef struct _rect_t {
-  int x;
-  int y;
-  int w;
-  int h;
-  struct _rect_t* next;
-} rect_t;
-
-struct _rects_t{
-  rect_t* head;
-  rect_t* tail;
-} rects;
+  struct _rects_t{
+    rect_t* head;
+    rect_t* tail;
+  } rects;
+#endif
 
 //================================
 // DATASTRUCTURE IMPLEMENTATION
@@ -225,33 +230,31 @@ polyline_t* prepend_polyline(polyline_t* q0, polyline_t* q1){
   return q1;
 }
 
-void print_rects(){
-  rect_t* it = rects.head;
-  while(it){
-    printf("%d %d %d %d\n",it->x,it->y,it->w,it->h);
-    it = it->next;
+#if SAVE_RECTS
+  void print_rects(){
+    rect_t* it = rects.head;
+    while(it){
+      printf("%d %d %d %d\n",it->x,it->y,it->w,it->h);
+      it = it->next;
+    }
   }
-}
-void destroy_rects(){
-  rect_t* it = rects.head;
-  while(it){
-    rect_t* jt = it->next;
-    free(it);
-    it = jt;
+  void destroy_rects(){
+    rect_t* it = rects.head;
+    while(it){
+      rect_t* jt = it->next;
+      free(it);
+      it = jt;
+    }
+    rects.head = NULL;
+    rects.tail = NULL;
   }
-  rects.head = NULL;
-  rects.tail = NULL;
-}
-
-void add_rect(int x, int y, int w, int h){
-  if (SAVE_RECTS){
+  void add_rect(int x, int y, int w, int h){
     rect_t* r = (rect_t*)malloc(sizeof(rect_t));
     r->x = x;
     r->y = y;
     r->w = w;
     r->h = h;
     r->next = NULL;
-    pthread_mutex_lock(&mutex);
     if (!rects.head){
       rects.head = r;
       rects.tail = r;
@@ -259,9 +262,8 @@ void add_rect(int x, int y, int w, int h){
       rects.tail->next = r;
       rects.tail = r;
     }
-    pthread_mutex_unlock(&mutex);
   }
-}
+#endif
 
 //================================
 // RASTER SKELETONIZATION
@@ -540,30 +542,16 @@ polyline_t* chunk_to_frags(int x, int y, int w, int h){
  * @param iter    current iteration
  * @return        an array of polylines
 */
-typedef struct _arg_t{
-  int x;
-  int y;
-  int w;
-  int h;
-  int iter;
-  int use_thread;
-} arg_t;
-void* trace_skeleton(void* varg){
-  arg_t* arg = (arg_t*)varg;
-  int x = arg->x;
-  int y = arg->y;
-  int w = arg->w;
-  int h = arg->h;
-  int iter = arg->iter;
+polyline_t* trace_skeleton(x,y,w,h,iter){
 
   polyline_t* frags = NULL;
   
   if (iter >= MAX_ITER){ // gameover
-    return (void*)frags;
+    return frags;
   }
   if (w <= CHUNK_SIZE && h <= CHUNK_SIZE){ // recursive bottom
     frags = chunk_to_frags(x,y,w,h);
-    return (void*)frags;
+    return frags;
   }
  
 
@@ -614,7 +602,6 @@ void* trace_skeleton(void* varg){
     }
   }
 
-
   int L0=-1; int L1; int L2; int L3;
   int R0=-1; int R1; int R2; int R3;
   int dr = 0;
@@ -630,59 +617,22 @@ void* trace_skeleton(void* varg){
     dr = HORIZONTAL;
     sx = mj;
   }
-
-  arg_t* aL = NULL;
-  arg_t* aR = NULL;
-
-
   if (dr!=0 && not_empty(L0,L1,L2,L3)){ // if there are no white pixels, don't waste time
-
-    add_rect(L0,L1,L2,L3);
-
-    aL = (arg_t*)malloc(sizeof(arg_t));
-    aL->x = L0; aL->y = L1; aL->w = L2; aL->h = L3;
-    aL->iter = iter+1;
-
+    #if SAVE_RECTS
+      add_rect(L0,L1,L2,L3);
+    #endif
+    frags = trace_skeleton(L0,L1,L2,L3,iter+1);
   }
-
-  if (R0!=-1 && not_empty(R0,R1,R2,R3)){
-
-    add_rect(R0,R1,R2,R3);
-
-    aR = (arg_t*)malloc(sizeof(arg_t));
-    aR->x = R0; aR->y = R1; aR->w = R2; aR->h = R3;
-    aR->iter = iter+1;
+  if (dr!=0 && not_empty(R0,R1,R2,R3)){
+    #if SAVE_RECTS
+      add_rect(R0,R1,R2,R3);
+    #endif
+    frags = merge_frags(frags, trace_skeleton(R0,R1,R2,R3,iter+1),sx,dr);
   }
-
-  if (aL && aR){
-    if (arg->use_thread){
-      pthread_t tL; pthread_t tR;
-      pthread_create(&tL, NULL, trace_skeleton, (void*)aL);
-      pthread_create(&tR, NULL, trace_skeleton, (void*)aR);
-      void* retL; void* retR;
-      pthread_join(tL, &retL);
-      pthread_join(tR, &retR);
-      frags = merge_frags((polyline_t*)retL,(polyline_t*)retR,sx,dr);
-    }else{
-      frags = merge_frags(trace_skeleton(aL),trace_skeleton(aR),sx,dr);
-    }
-  }else if (aL){
-    frags = trace_skeleton(aL);
-  }else if (aR){
-    frags = trace_skeleton(aR);
-  }
-
-  if (aL){
-    free(aL);
-  }
-  if (aR){
-    free(aR);
-  }
-
   if (mi == -1 && mj == -1){ // splitting failed! do the recursive bottom instead
     frags = chunk_to_frags(x,y,w,h);
   }
-  return (void*)frags;
+  return frags;
 }
 
 
@@ -763,152 +713,156 @@ void print_bitmap(){
   }
 }
 
-Display *dis;
-int screen;
-Window win;
-GC gc;
 
-void init_x11(){    
-  unsigned long black,white;
-  dis=XOpenDisplay((char *)0);
-  screen=DefaultScreen(dis);
-  black=BlackPixel(dis, screen),
-  white=WhitePixel(dis, screen);
-  win=XCreateSimpleWindow(dis,DefaultRootWindow(dis),0,0, 
-      W*VIEW_SCALE,H*VIEW_SCALE, 5,black, white);
-  XSetStandardProperties(dis,win,"trace_skeleton.c","trace_skeleton.c",None,NULL,0,NULL);
-  XSelectInput(dis, win, ExposureMask|ButtonPressMask|KeyPressMask);
-      gc=XCreateGC(dis, win, 0,0);        
-  XSetBackground(dis,gc,white);
-  XSetForeground(dis,gc,black);
-  XClearWindow(dis, win);
-  XMapRaised(dis, win);
-}
+#if SHOW_GUI
 
-char* make_x11_bitmap(){
-  int ww = ceil((float)(W*VIEW_SCALE)/8.0)*8;
-  char* bmp = (char*) calloc(ceil(((float)(ww*H*VIEW_SCALE)/8.0)),sizeof(char));
-  
-  for (int i = 0; i < W*H; i++){
-    int x = i % W;
-    int y = i / W;
-    
-    if (!im[i]){
-      int ii = (y*VIEW_SCALE)*ww+(x*VIEW_SCALE);
-      int b = ii%8;
-      int n = ii/8;
-      bmp[n] = bmp[n]|(1<<(b));
-    }
+  Display *dis;
+  int screen;
+  Window win;
+  GC gc;
+
+  void init_x11(){    
+    unsigned long black,white;
+    dis=XOpenDisplay((char *)0);
+    screen=DefaultScreen(dis);
+    black=BlackPixel(dis, screen),
+    white=WhitePixel(dis, screen);
+    win=XCreateSimpleWindow(dis,DefaultRootWindow(dis),0,0, 
+        W*VIEW_SCALE,H*VIEW_SCALE, 5,black, white);
+    XSetStandardProperties(dis,win,"trace_skeleton.c","trace_skeleton.c",None,NULL,0,NULL);
+    XSelectInput(dis, win, ExposureMask|ButtonPressMask|KeyPressMask);
+        gc=XCreateGC(dis, win, 0,0);        
+    XSetBackground(dis,gc,white);
+    XSetForeground(dis,gc,black);
+    XClearWindow(dis, win);
+    XMapRaised(dis, win);
   }
-  return bmp;
-}
+
+  char* make_x11_bitmap(){
+    int ww = ceil((float)(W*VIEW_SCALE)/8.0)*8;
+    char* bmp = (char*) calloc(ceil(((float)(ww*H*VIEW_SCALE)/8.0)),sizeof(char));
+    
+    for (int i = 0; i < W*H; i++){
+      int x = i % W;
+      int y = i / W;
+      
+      if (!im[i]){
+        int ii = (y*VIEW_SCALE)*ww+(x*VIEW_SCALE);
+        int b = ii%8;
+        int n = ii/8;
+        bmp[n] = bmp[n]|(1<<(b));
+      }
+    }
+    return bmp;
+  }
+#endif
 
 int main(int argc, char** argv){
-
-  rects.head = NULL;
-  rects.tail = NULL;
+  #if SAVE_RECTS
+    rects.head = NULL;
+    rects.tail = NULL;
+  #endif
 
   if (read_png_as_bitmap(argv[1])<0){
     printf("Error reading PNG. Abort.");exit(1);
   }
+  #if SHOW_GUI
+    char* bmp;
+    bmp = make_x11_bitmap();
+  #endif
 
-  char* bmp;
-  if (SHOW_GUI){bmp = make_x11_bitmap();}
-
-  // print_bitmap();
+  print_bitmap();
   thinning_zs();
-  // print_bitmap();
-
-  arg_t* a = (arg_t*)malloc(sizeof(arg_t));
-  a->x = 0; a->y = 0; a->w = W; a->h = H;
-  a->iter = 0;
-  a->use_thread = USE_THREAD;
+  print_bitmap();
 
   polyline_t* p = NULL;
 
   if (TEST_SPEED){
-    for (int ut = 0; ut <= 1; ut++){
-      a->use_thread = ut;
-      clock_t t; 
-      t = clock();
-      int n = 200;
-      for (int i = 0; i < n; i++){
-        destroy_polylines(p);
+    clock_t t; 
+    t = clock();
+    int n = TEST_SPEED;
+    for (int i = 0; i < n; i++){
+      destroy_polylines(p);
+      #if SAVE_RECTS
         destroy_rects();
-        p = (polyline_t*)trace_skeleton(a);
-      }
-      t = clock() - t; 
-      double time_taken = ((double)t)/CLOCKS_PER_SEC;
-      printf("threaded? %d; time taken: %f s / %d runs\n",ut,time_taken,n);
+      #endif
+      p = trace_skeleton(0,0,W,H,0);
     }
+    t = clock() - t; 
+    double time_taken = ((double)t)/CLOCKS_PER_SEC;
+    printf("time taken: %f s / %d runs\n",time_taken,n);
     destroy_polylines(p);
-    destroy_rects();
+    #if SAVE_RECTS
+      destroy_rects();
+    #endif
   }
   
-  p = (polyline_t*)trace_skeleton(a);
-
+  p = trace_skeleton(0,0,W,H,0);
   print_polylines(p);
 
-  if (!SHOW_GUI){
-    goto cleanup;
-  }
+  #if SHOW_GUI
 
-  //================================
-  // DRAW RESULT WITH X11
-  //================================
+    //================================
+    // DRAW RESULT WITH X11
+    //================================
 
-  XEvent event;
-  KeySym key;
-  char text[255];
-  init_x11();
+    XEvent event;
+    KeySym key;
+    char text[255];
+    init_x11();
 
-  Pixmap pix = XCreateBitmapFromData(dis, win, (char*)bmp, W*VIEW_SCALE,H*VIEW_SCALE);
+    Pixmap pix = XCreateBitmapFromData(dis, win, (char*)bmp, W*VIEW_SCALE,H*VIEW_SCALE);
 
-  while(1) { 
-    XNextEvent(dis, &event);
-    if (event.type==Expose && event.xexpose.count==0) {
-      XClearWindow(dis, win);
-      rect_t* rt = rects.head;
+    while(1) { 
+      XNextEvent(dis, &event);
+      if (event.type==Expose && event.xexpose.count==0) {
+        XClearWindow(dis, win);
 
-      XSetForeground(dis,gc,0);
-      XCopyPlane(dis, pix, win, gc,0, 0,W*VIEW_SCALE, H*VIEW_SCALE,0, 0,1);
-      
-      XSetForeground(dis,gc,0x444444);
-      XSetLineAttributes(dis, gc, 1, LineSolid, CapRound, JoinMiter);
-      while (rt){
-        XDrawRectangle(dis,win,gc,rt->x*VIEW_SCALE,rt->y*VIEW_SCALE,rt->w*VIEW_SCALE,rt->h*VIEW_SCALE);
-        rt = rt->next;
-      }
-      polyline_t* it = p;
-
-      XSetLineAttributes(dis, gc, 2, LineSolid, CapRound, JoinMiter);
-
-      while(it){
+        XSetForeground(dis,gc,0);
+        XCopyPlane(dis, pix, win, gc,0, 0,W*VIEW_SCALE, H*VIEW_SCALE,0, 0,1);
         
-        point_t* jt = it->head;
+        #if SAVE_RECTS
+          rect_t* rt = rects.head;
 
-        XSetForeground(dis,gc,rand()%0xFFFFFF);
-
-        while(jt){
-          point_t* kt = jt->next;
-          XDrawRectangle(dis,win,gc,jt->x*VIEW_SCALE-1,jt->y*VIEW_SCALE-1,2,2);
-
-          if (kt){
-            XDrawLine(dis,win,gc,jt->x*VIEW_SCALE,jt->y*VIEW_SCALE,kt->x*VIEW_SCALE,kt->y*VIEW_SCALE);
+          XSetForeground(dis,gc,0x444444);
+          XSetLineAttributes(dis, gc, 1, LineSolid, CapRound, JoinMiter);
+          while (rt){
+            XDrawRectangle(dis,win,gc,rt->x*VIEW_SCALE,rt->y*VIEW_SCALE,rt->w*VIEW_SCALE,rt->h*VIEW_SCALE);
+            rt = rt->next;
           }
-          jt = kt;
+        #endif
+
+        polyline_t* it = p;
+
+        XSetLineAttributes(dis, gc, 2, LineSolid, CapRound, JoinMiter);
+
+        while(it){
+          
+          point_t* jt = it->head;
+
+          XSetForeground(dis,gc,rand()%0xFFFFFF);
+
+          while(jt){
+            point_t* kt = jt->next;
+            XDrawRectangle(dis,win,gc,jt->x*VIEW_SCALE-1,jt->y*VIEW_SCALE-1,2,2);
+
+            if (kt){
+              XDrawLine(dis,win,gc,jt->x*VIEW_SCALE,jt->y*VIEW_SCALE,kt->x*VIEW_SCALE,kt->y*VIEW_SCALE);
+            }
+            jt = kt;
+          }
+          it = it->next;
         }
-        it = it->next;
+
       }
-
     }
-  }
 
-  cleanup:
+  #endif /*SHOW_GUI*/
+  
   destroy_polylines(p);
-  destroy_rects();
-  free(a);
+  #if SAVE_RECTS
+    destroy_rects();
+  #endif
   free(im);
-
   return 0;
 }

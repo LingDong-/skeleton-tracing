@@ -122,7 +122,7 @@ namespace ofxSkeleton{
       return;
     }
     if (!q0){
-      *q0 = *new_polyline();
+      q0 = new_polyline();
     }
     if (!q0->head){
       q0->head = q1->head;
@@ -140,7 +140,7 @@ namespace ofxSkeleton{
       return;
     }
     if (!q0){
-      *q0 = *new_polyline();
+      q0 = new_polyline();
     }
     if (!q1->head){
       return;
@@ -485,31 +485,18 @@ namespace ofxSkeleton{
    * @param iter    current iteration
    * @return        an array of polylines
    */
-  typedef struct _arg_t{
-    int x;
-    int y;
-    int w;
-    int h;
-    int iter;
-  } arg_t;
-  inline void* trace_skeleton(void* varg){
-    arg_t* arg = (arg_t*)varg;
-    int x = arg->x;
-    int y = arg->y;
-    int w = arg->w;
-    int h = arg->h;
-    int iter = arg->iter;
-    
+
+  inline polyline_t* trace_skeleton(int x, int y, int w, int h, int iter){
     // printf("_%d %d %d %d %d\n",x,y,w,h,iter);
     
     polyline_t* frags = NULL;
     
     if (iter >= MAX_ITER){ // gameover
-      return (void*)frags;
+      return frags;
     }
     if (w <= CHUNK_SIZE && h <= CHUNK_SIZE){ // recursive bottom
       frags = chunk_to_frags(x,y,w,h);
-      return (void*)frags;
+      return frags;
     }
     
     int ms = INT_MAX; // number of white pixels on the seam, less the better
@@ -574,49 +561,20 @@ namespace ofxSkeleton{
       sx = mj;
     }
     
-    arg_t* aL = NULL;
-    arg_t* aR = NULL;
-    
-    
     if (dr!=0 && not_empty(L0,L1,L2,L3)){ // if there are no white pixels, don't waste time
-      
       add_rect(L0,L1,L2,L3);
-      
-      aL = (arg_t*)malloc(sizeof(arg_t));
-      aL->x = L0; aL->y = L1; aL->w = L2; aL->h = L3;
-      aL->iter = iter+1;
-      
+      frags = trace_skeleton(L0,L1,L2,L3,iter+1);
     }
-    
-    if (R0!=-1 && not_empty(R0,R1,R2,R3)){
-      
+    if (dr!=0 && not_empty(R0,R1,R2,R3)){
       add_rect(R0,R1,R2,R3);
-      
-      aR = (arg_t*)malloc(sizeof(arg_t));
-      aR->x = R0; aR->y = R1; aR->w = R2; aR->h = R3;
-      aR->iter = iter+1;
-    }
-    
-    if (aL && aR){
-      frags = merge_frags((polyline_t*)trace_skeleton(aL),(polyline_t*)trace_skeleton(aR),sx,dr);
-    }else if (aL){
-      frags = (polyline_t*)trace_skeleton(aL);
-    }else if (aR){
-      frags = (polyline_t*)trace_skeleton(aR);
-    }
-    
-    if (aL){
-      free(aL);
-    }
-    if (aR){
-      free(aR);
+      frags = merge_frags(frags, trace_skeleton(R0,R1,R2,R3,iter+1),sx,dr);
     }
     
     if (mi == -1 && mj == -1){ // splitting failed! do the recursive bottom instead
       frags = chunk_to_frags(x,y,w,h);
     }
     
-    return (void*)frags;
+    return frags;
   }
   
   
@@ -651,13 +609,6 @@ namespace ofxSkeleton{
     
     destroy_rects();
     
-    arg_t* arg = (arg_t*)malloc(sizeof(arg_t));
-    arg->x = 0;
-    arg->y = 0;
-    arg->w = W;
-    arg->h = H;
-    arg->iter = 0;
-
     for (int i = 0; i < W*H; i++){
       im[i] = pix[i*step]>=128?1:0;
     }
@@ -665,7 +616,7 @@ namespace ofxSkeleton{
       thinning_zs();
     }
     
-    polyline_t* p = (polyline_t*)trace_skeleton((void*)arg);
+    polyline_t* p = trace_skeleton(0,0,W,H,0);
     
     std::vector<std::vector<ofVec2f>> polylines;
     if (p){
@@ -683,7 +634,6 @@ namespace ofxSkeleton{
       }
     }
 
-    free(arg);
     destroy_polylines(p);
     return polylines;
   }

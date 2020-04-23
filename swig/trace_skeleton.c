@@ -223,7 +223,7 @@ void destroy_rects(){
 }
 
 void add_rect(int x, int y, int w, int h){
-  if (SKEL__SAVE_RECTS){
+  #if SKEL__SAVE_RECTS
     rect_t* r = (rect_t*)malloc(sizeof(rect_t));
     r->x = x;
     r->y = y;
@@ -239,7 +239,7 @@ void add_rect(int x, int y, int w, int h){
       rects.tail = r;
     }
 
-  }
+  #endif
 }
 
 //================================
@@ -519,32 +519,16 @@ polyline_t* chunk_to_frags(int x, int y, int w, int h){
  * @param iter    current iteration
  * @return        an array of polylines
 */
-typedef struct _arg_t{
-  int x;
-  int y;
-  int w;
-  int h;
-  int iter;
-
-} arg_t;
-void* trace_skeleton(void* varg){
-  arg_t* arg = (arg_t*)varg;
-  int x = arg->x;
-  int y = arg->y;
-  int w = arg->w;
-  int h = arg->h;
-  int iter = arg->iter;
-
-
+polyline_t* trace_skeleton(int x, int y, int w, int h, int iter){
 
   polyline_t* frags = NULL;
   
   if (iter >= SKEL__MAX_ITER){ // gameover
-    return (void*)frags;
+    return frags;
   }
   if (w <= SKEL__CHUNK_SIZE && h <= SKEL__CHUNK_SIZE){ // recursive bottom
     frags = chunk_to_frags(x,y,w,h);
-    return (void*)frags;
+    return frags;
   }
   
 
@@ -611,48 +595,23 @@ void* trace_skeleton(void* varg){
     sx = mj;
   }
 
-  arg_t* aL = NULL;
-  arg_t* aR = NULL;
-
-
   if (dr!=0 && not_empty(L0,L1,L2,L3)){ // if there are no white pixels, don't waste time
-
-    add_rect(L0,L1,L2,L3);
-
-    aL = (arg_t*)malloc(sizeof(arg_t));
-    aL->x = L0; aL->y = L1; aL->w = L2; aL->h = L3;
-    aL->iter = iter+1;
-
+    #if SKEL__SAVE_RECTS
+      add_rect(L0,L1,L2,L3);
+    #endif
+    frags = trace_skeleton(L0,L1,L2,L3,iter+1);
   }
-
-  if (R0!=-1 && not_empty(R0,R1,R2,R3)){
-
-    add_rect(R0,R1,R2,R3);
-
-    aR = (arg_t*)malloc(sizeof(arg_t));
-    aR->x = R0; aR->y = R1; aR->w = R2; aR->h = R3;
-    aR->iter = iter+1;
-  }
-
-  if (aL && aR){
-    frags = merge_frags(trace_skeleton(aL),trace_skeleton(aR),sx,dr);
-  }else if (aL){
-    frags = trace_skeleton(aL);
-  }else if (aR){
-    frags = trace_skeleton(aR);
-  }
-
-  if (aL){
-    free(aL);
-  }
-  if (aR){
-    free(aR);
+  if (dr!=0 && not_empty(R0,R1,R2,R3)){
+    #if SKEL__SAVE_RECTS
+      add_rect(R0,R1,R2,R3);
+    #endif
+    frags = merge_frags(frags, trace_skeleton(R0,R1,R2,R3,iter+1),sx,dr);
   }
 
   if (mi == -1 && mj == -1){ // splitting failed! do the recursive bottom instead
     frags = chunk_to_frags(x,y,w,h);
   }
-  return (void*)frags;
+  return frags;
 }
 void print_bitmap(){
   for (int i = 0; i < H; i++){
@@ -676,21 +635,13 @@ void trace(char* img, int w, int h){
 
   im = img;
 
-  arg_t* arg = (arg_t*)malloc(sizeof(arg_t));
-  arg->x = 0;
-  arg->y = 0;
-  arg->w = W;
-  arg->h = H;
-  arg->iter = 0;
-
   // print_bitmap();
   thinning_zs();
   // print_bitmap();
   
-  polylines = (polyline_t*)trace_skeleton((void*)arg);
+  polylines = trace_skeleton(0,0,W,H,0);
   // print_polylines(polylines);
 
-  free(arg);
   // free(im);
 }
 
