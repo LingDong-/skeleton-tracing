@@ -2,7 +2,7 @@
 
 *A new algorithm for retrieving topological skeleton as a set of polylines from binary images.*
 
-[Available in all your favorite languages](#impl): C, C++, Java, JavaScript, Python, Go, C#/Unity, Swift, Rust,  Processing, OpenFrameworks.
+[Available in all your favorite languages](#impl): C, C++, Java, JavaScript, Python, Go, C#/Unity, Swift, Rust, Julia, Processing, OpenFrameworks.
 
 **[[Online Demo](https://skeleton-tracing.netlify.app)]**
 
@@ -55,6 +55,32 @@ Click on links below to see each implementation's documentation and code.
 - [**Go**](go) (parallelized with goroutines)
 - [**Swift**](swift) (demo with NSImage and AppKit)
 - [**Rust**](rs) (simple rust implementation)
+- [**Julia**](jl) (julia implementation with array views)
  
+## Benchmarks
+
+The benchmarks below are produced on MacBook Pro Mid 2015 (2.5 GHz Intel Core i7, 16GB 1600 MHz DDR3). The input image is `test_images/opencv-thinning-src-img.png` (300x149px).
+
+All the times refer to pure or "vanilla" implemenations, not wrappers of C/C++. Wrappers on C/C++ should be comparable to the performance of C plus some overhead. Exception is WebAssembly performance which depends heavily on browser and number of open tabs.
+
+All the times refer to the "tracing" operation only, excluding the raster thinning step (which is not my algorithm (problem), but note that practically, raster thinning often takes longer than the tracing, especially for images with lots of white pixels).
+
+
+For compiled languages, the highest possible optimization level is selected, unless otherwise specified.
+
+Ordered by fastest to slowest.
+
+| Language   | Seconds/1000 Runs       | FPS        | % C speed | Note
+|------------|-------------------------|------------|-----------|-----------
+| C          |  0.759748               | 1316       | 100%      | -O3
+| Go         |  1.1165248              | 895        | 68%       |
+| Rust       |  1.39878                | 714        | 54%       | -O
+| Java       |  1.722                  | 580        | 44%       |
+| Swift      |  1.795619               | 556        | 42%       | -O
+| JavaScript |  1.948                  | 513        | 38%       | Node.js v12.10
+| C#         |  4.266101               | 234        | 17%       | Unity 2018.4.8f1
+| Julia      |  4.722 (2.791 amortized)| 211        | 16%       | First frame takes 2 sec, the rest 0.002 sec
+| Python     |  1015.04818             | 1          | 0%        | Python 3.7
+
  
 **Developed at [Frank-Ratchye STUDIO for Creative Inquiry](https://studioforcreativeinquiry.org) at Carnegie Mellon University.**

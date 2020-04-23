@@ -317,7 +317,7 @@ if __name__ == "__main__":
   #     print(im[i,j],end="")
   #   print("")
   # print(np.sum(im),im.shape[0]*im.shape[1])
-  im = thinningSkimage(im);
+  im = thinning(im);
 
   # cv2.imshow('',im*255);cv2.waitKey(0)
 
