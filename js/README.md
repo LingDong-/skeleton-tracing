@@ -10,9 +10,9 @@
 or 
 
 ```js
-const TraceSkeleton = require('skeleton-tracing-vanilla')
+const TraceSkeleton = require('skeleton-tracing-js')
 
-import TraceSkeleton  from 'skeleton-tracing-vanilla';
+import TraceSkeleton  from 'skeleton-tracing-js';
 ```
 
 
