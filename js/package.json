@@ -1,6 +1,6 @@
 {
   "name": "skeleton-tracing-js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A new algorithm for retrieving topological skeleton as a set of polylines from binary images",
   "main": "dist/trace_skeleton.js",
   "unpkg": "dist/trace_skeleton.min.js",

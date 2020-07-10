@@ -9,7 +9,7 @@
 or 
 
 ```js
-const { TraceSkeleton } = require('skeleton-tracing-vanilla')
+const TraceSkeleton = require('skeleton-tracing-vanilla')
 
 import TraceSkeleton  from 'skeleton-tracing-vanilla';
 ```
@@ -58,7 +58,7 @@ See `/index.html` for more detailed usage example, with animation, interactivity
 
 ### More info at
 
-https://github.com/LingDong-/skeleton-tracing
-https://skeleton-tracing.netlify.app/
+[Github Original Project](https://github.com/LingDong-/skeleton-tracing)
+[https://skeleton-tracing.netlify.app/](https://skeleton-tracing.netlify.app/)
 
 **Developed at [Frank-Ratchye STUDIO for Creative Inquiry](https://studioforcreativeinquiry.org) at Carnegie Mellon University.**
