@@ -4,7 +4,7 @@
 ## Usage
 
 ```html
-<script src="trace_skeleton.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skeleton-tracing-js/dist/trace_skeleton.min.js"></script>
 ```
 
 or 
