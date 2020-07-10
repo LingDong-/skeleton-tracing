@@ -1,4 +1,5 @@
-# Skeleton Tracing
+# Skeleton Tracing 
+## by [Lingdong Huang](https://github.com/LingDong-)
 
 ## Usage
 
@@ -59,6 +60,7 @@ See `/index.html` for more detailed usage example, with animation, interactivity
 ### More info at
 
 [Github Original Project](https://github.com/LingDong-/skeleton-tracing)
+
 [https://skeleton-tracing.netlify.app/](https://skeleton-tracing.netlify.app/)
 
 **Developed at [Frank-Ratchye STUDIO for Creative Inquiry](https://studioforcreativeinquiry.org) at Carnegie Mellon University.**
