@@ -424,3 +424,5 @@ var TraceSkeleton = new function(){ var that = this;
   }
 
 }
+
+export default TraceSkeleton 
