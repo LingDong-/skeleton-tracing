@@ -4,7 +4,6 @@ import { terser } from 'rollup-plugin-terser';
 import commonjs from 'rollup-plugin-commonjs';
 import resolve from 'rollup-plugin-node-resolve';
 import nodePolyfills from 'rollup-plugin-node-polyfills';
-import copy from 'rollup-plugin-copy';
 
 export default [
   {
@@ -14,14 +13,6 @@ export default [
       resolve(),
       commonjs(),
       ascii(),
-      copy({
-        targets: [
-          {
-            src: 'dist/trace_skeleton.wasm',
-            dest: 'build',
-          },
-        ],
-      }),
     ],
     output: {
       extend: true,
@@ -37,15 +28,7 @@ export default [
       resolve(),
       commonjs(),
       ascii(),
-      terser(),
-      copy({
-        targets: [
-          {
-            src: 'dist/trace_skeleton.wasm',
-            dest: 'build',
-          },
-        ],
-      }),
+      terser()
     ],
     output: {
       extend: true,

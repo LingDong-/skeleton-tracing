@@ -1,14 +1,20 @@
-# trace_skeleton.js
-
-The JavaScript libary compiled from C++ with emscripten, accelerated with WebAssembly.
+# Skeleton Tracing WASM
+## by [Lingdong Huang](https://github.com/LingDong-)
 
 ## Usage
 
 ```html
-<script src="trace_skeleton.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skeleton-tracing-wasm/build/trace_skeleton_wasm.js"></script>
 ```
 
-Make sure `trace_skeleton.wasm` is also in the same folder.
+To initiate the wasm version you need first to load 
+
+
+```js
+const TraceSkeleton = require('skeleton-tracing-wasm)
+
+import TraceSkeleton  from 'skeleton-tracing-wasm';
+```
 
 
 The below API's take an image representation and returns an object holding the polylines as well as rects processed by the algorithm (the latter is mainly for visualization)
@@ -51,5 +57,11 @@ Options:
 
 See `/index.html` for more detailed usage example, with animation, interactivity, webcam, etc.
 
+
+### More info at
+
+[Github Original Project](https://github.com/LingDong-/skeleton-tracing)
+
+[https://skeleton-tracing.netlify.app/](https://skeleton-tracing.netlify.app/)
 
 **Developed at [Frank-Ratchye STUDIO for Creative Inquiry](https://studioforcreativeinquiry.org) at Carnegie Mellon University.**
