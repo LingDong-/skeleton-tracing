@@ -61,8 +61,16 @@
     <pre id="readme"></pre>
   </div>
 </body>
-<script src="wasm/dist/trace_skeleton.js"></script><script>TraceSkeletonWASM=TraceSkeleton</script>
-<script src="js/trace_skeleton.vanilla.js"></script><script>TraceSkeletonVanilla=TraceSkeleton;try{TraceSkeleton=TraceSkeletonWASM}catch(e){}</script>
+<script src="https://cdn.jsdelivr.net/npm/skeleton-tracing-wasm/build/trace_skeleton_wasm.js"></script>
+<script>
+  (async function loadTraceSkeletonWasm(){
+    TraceSkeletonWASM = await TraceSkeleton.load();
+  })();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/skeleton-tracing-js/dist/trace_skeleton.min.js"></script>
+<script>
+  TraceSkeletonVanilla=TraceSkeleton;try{TraceSkeleton=TraceSkeletonWASM}catch(e){}
+</script>
 <script defer>
 var TOP = 200;
 var LEFT= "calc(50% - 400px)";
@@ -304,7 +312,6 @@ fetch('README.md').then(function (response) {
   console.warn('Something went wrong.', err);
 });
 
-TraceSkeleton.onload(function(){
   // fromDrawing();
   fromDrawing("test_images/horse_r.png")
   document.getElementById("sel").onchange = function(){
@@ -331,5 +338,4 @@ TraceSkeleton.onload(function(){
       TraceSkeleton=TraceSkeletonVanilla;
     }
   }
-})
 </script>

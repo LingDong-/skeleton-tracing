@@ -6,14 +6,37 @@
 ```html
 <script src="https://cdn.jsdelivr.net/npm/skeleton-tracing-wasm/build/trace_skeleton_wasm.js"></script>
 ```
-
-To initiate the wasm version you need first to load 
-
-
 ```js
 const TraceSkeleton = require('skeleton-tracing-wasm)
 
 import TraceSkeleton  from 'skeleton-tracing-wasm';
+```
+
+You first need to initiate/load the wasm module calling a static method `load()` 
+
+```js
+const tracer = await TraceSkeleton.load()
+```
+
+then you can use the API methods
+
+```js
+
+const { polylines,rects } = tracer.fromCanvas(HTMLCANVAS)
+
+```
+
+Or instead of async/await you can do
+
+```js
+
+TraceSkeleton.load().then(tracer => {
+	// wasm module loaded
+	// here is your code 
+	const { polylines,rects } = tracer.fromCanvas(HTMLCANVAS)
+
+})
+
 ```
 
 
