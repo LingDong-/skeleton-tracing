@@ -7,9 +7,9 @@
 <script src="https://cdn.jsdelivr.net/npm/skeleton-tracing-wasm/build/trace_skeleton_wasm.js"></script>
 ```
 ```js
-const TraceSkeleton = require('skeleton-tracing-wasm)
+const TraceSkeleton = require('skeleton-tracing-wasm')
 
-import TraceSkeleton  from 'skeleton-tracing-wasm';
+import TraceSkeleton  from 'skeleton-tracing-wasm'
 ```
 
 You first need to initiate/load the wasm module calling a static method `load()` 

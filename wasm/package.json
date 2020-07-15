@@ -1,6 +1,6 @@
 {
   "name": "skeleton-tracing-wasm",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A new algorithm for retrieving topological skeleton as a set of polylines from binary images: WASM version",
   "main": "build/trace_skeleton_wasm.js",
   "unpkg": "build/trace_skeleton_wasm.min.js",
