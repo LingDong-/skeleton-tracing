@@ -1,14 +1,43 @@
-# trace_skeleton.js
-
-The JavaScript libary compiled from C++ with emscripten, accelerated with WebAssembly.
+# Skeleton Tracing WASM
+## by [Lingdong Huang](https://github.com/LingDong-)
 
 ## Usage
 
 ```html
-<script src="trace_skeleton.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skeleton-tracing-wasm/build/trace_skeleton_wasm.js"></script>
+```
+```js
+const TraceSkeleton = require('skeleton-tracing-wasm')
+
+import TraceSkeleton  from 'skeleton-tracing-wasm'
 ```
 
-Make sure `trace_skeleton.wasm` is also in the same folder.
+You first need to initiate/load the wasm module calling a static method `load()` 
+
+```js
+const tracer = await TraceSkeleton.load()
+```
+
+then you can use the API methods
+
+```js
+
+const { polylines,rects } = tracer.fromCanvas(HTMLCANVAS)
+
+```
+
+Or instead of async/await you can do
+
+```js
+
+TraceSkeleton.load().then(tracer => {
+	// wasm module loaded
+	// here is your code 
+	const { polylines,rects } = tracer.fromCanvas(HTMLCANVAS)
+
+})
+
+```
 
 
 The below API's take an image representation and returns an object holding the polylines as well as rects processed by the algorithm (the latter is mainly for visualization)
@@ -51,5 +80,11 @@ Options:
 
 See `/index.html` for more detailed usage example, with animation, interactivity, webcam, etc.
 
+
+### More info at
+
+[Github Original Project](https://github.com/LingDong-/skeleton-tracing)
+
+[https://skeleton-tracing.netlify.app/](https://skeleton-tracing.netlify.app/)
 
 **Developed at [Frank-Ratchye STUDIO for Creative Inquiry](https://studioforcreativeinquiry.org) at Carnegie Mellon University.**
