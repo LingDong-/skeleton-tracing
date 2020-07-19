@@ -1,0 +1,88 @@
+<body></body>
+<script>
+
+  function read_polylines(main,q){
+    var ret = [];
+    function print_polylines(q){
+      var it = main.pl_get_head(q);
+      var out = [];
+      while (it){
+        var x = main.pt_get_x(it);
+        var y = main.pt_get_y(it);
+        out.push([x,y])
+        it = main.pt_get_next(it);
+      }
+      ret.push(out);
+      var q1 = main.pl_get_next(q)
+      if (q1){
+        print_polylines(q1);
+      }
+    }
+    print_polylines(q);
+    return ret;
+  }
+
+  function visualize(p,w,h){
+    var s = 1;
+    var sw = 1;
+
+    var svg = `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="${w*s}" height="${h*s}">`
+    for (var i = 0; i < p.length; i++){
+      svg += `<path fill="none" stroke-width="${sw}" stroke="rgb(${Math.floor(Math.random()*200)},${Math.floor(Math.random()*200)},${Math.floor(Math.random()*200)})" d="M${p[i].map(x=>x[0]*s+","+x[1]*s).join(" L")}"/>`
+    }
+    for (var i = 0; i < p.length; i++){
+      for (var j = 0; j < p[i].length; j++){
+        svg += `<rect fill="none" stroke="black" x="${p[i][j][0]*s-2}" y="${p[i][j][1]*s-2}" width="4" height="4" stroke-width="0.2"/>`
+      }
+    }
+    svg += "</svg>"
+    return svg;
+  }
+
+
+
+  var main;
+  fetch('traceskeleton.wasm').then(response =>
+    response.arrayBuffer()
+  ).then(bytes => WebAssembly.instantiate(bytes,{
+    console: {
+      log  : (x)=>(console.log(x)),
+    log2 : (x,y)=>(console.log(x,y)),
+    log4 : (x,y,z,w)=>(console.log(x,y,z,w)),
+    print: (x)=>(
+      console.log(read_polylines(main,x))
+    )
+    }
+  })).then(results => {
+    main = results.instance.exports;
+    var img = new Image();
+    img.src = "../test_images/horse_r.png"
+    img.onload = function(){
+      let [w,h] = [img.width,img.height];
+      let ctx = document.createElement("canvas").getContext('2d');
+      [ctx.canvas.width,ctx.canvas.height] = [w,h];
+      ctx.drawImage(img,0,0);
+      var imgdata = ctx.getImageData(0,0,w,h);
+
+      main.setup(w,h);
+      for (var i = 0; i < h; i++){
+        for (var j = 0; j < w; j++){
+          main.im_set(j,i,imgdata.data[(i*w+j)*4]>128?1:0);
+        }
+      }
+      main.thinning_zs();
+      var time = new Date();
+      var q = main.trace_skeleton(0,0,w,h,999);
+      console.log((new Date())-time);
+      var p = read_polylines(main,q);
+
+      var div = document.createElement("div");
+      div.innerHTML = visualize(p,w,h)
+      div.style = "position:absolute;left:0px;top:0px;"
+      ctx.canvas.style = "position:absolute;left:0px;top:0px;opacity:0.2"
+
+      document.body.appendChild(ctx.canvas);
+      document.body.appendChild(div);
+    }
+  }).catch(console.error);
+</script>
