@@ -20,9 +20,8 @@
 //================================
 // PARAMS
 //================================
-#define SKEL__CHUNK_SIZE 10           // the chunk size
 #define SKEL__SAVE_RECTS 0            // additionally save bounding rects of chunks (for visualization)
-#define SKEL__MAX_ITER 999            // maximum number of iterations
+
 
 //================================
 // GLOBALS
@@ -519,24 +518,21 @@ polyline_t* chunk_to_frags(int x, int y, int w, int h){
  * @param iter    current iteration
  * @return        an array of polylines
 */
-polyline_t* trace_skeleton(int x, int y, int w, int h, int iter){
+polyline_t* trace_skeleton(int x, int y, int w, int h, int iter, int csize, int maxIter){
 
   polyline_t* frags = NULL;
-  
-  if (iter >= SKEL__MAX_ITER){ // gameover
+  if (iter >= maxIter){ // gameover
     return frags;
   }
-  if (w <= SKEL__CHUNK_SIZE && h <= SKEL__CHUNK_SIZE){ // recursive bottom
+  if (w <= csize && h <= csize){ // recursive bottom
     frags = chunk_to_frags(x,y,w,h);
     return frags;
   }
-  
 
   int ms = W+H; // number of white pixels on the seam, less the better
   int mi = -1; // horizontal seam candidate
   int mj = -1; // vertical   seam candidate
-  
-  if (h > SKEL__CHUNK_SIZE){ // try splitting top and bottom
+  if (h > csize){ // try splitting top and bottom
     for (int i = y+3; i < y+h-3; i++){
       if (im[i*W+x] ||im[(i-1)*W+x] ||im[i*W+x+w-1] ||im[(i-1)*W+x+w-1]){
         continue;
@@ -556,7 +552,7 @@ polyline_t* trace_skeleton(int x, int y, int w, int h, int iter){
     }
   }
 
-  if (w > SKEL__CHUNK_SIZE){ // same as above, try splitting left and right
+  if (w > csize){ // same as above, try splitting left and right
     for (int j = x+3; j < x+w-3; j++){
       if (im[W*y+j]||im[W*(y+h)-W+j]||im[W*y+j-1]||im[W*(y+h)-W+j-1]){
         continue;
@@ -583,12 +579,12 @@ polyline_t* trace_skeleton(int x, int y, int w, int h, int iter){
   int R0=-1; int R1; int R2; int R3;
   int dr = 0;
   int sx;
-  if (h > SKEL__CHUNK_SIZE && mi != -1){ // split top and bottom
+  if (h > csize && mi != -1){ // split top and bottom
     L0 = x; L1 = y;  L2 = w; L3 = mi-y;
     R0 = x; R1 = mi; R2 = w; R3 = y+h-mi;
     dr = SKEL__VERTICAL;
     sx = mi;
-  }else if (w > SKEL__CHUNK_SIZE && mj != -1){ // split left and right
+  }else if (w > csize && mj != -1){ // split left and right
     L0 = x; L1 = y; L2 = mj-x; L3 = h;
     R0 = mj;R1 = y; R2 =x+w-mj;R3 = h;
     dr = SKEL__HORIZONTAL;
@@ -599,13 +595,18 @@ polyline_t* trace_skeleton(int x, int y, int w, int h, int iter){
     #if SKEL__SAVE_RECTS
       add_rect(L0,L1,L2,L3);
     #endif
-    frags = trace_skeleton(L0,L1,L2,L3,iter+1);
+    frags = trace_skeleton(L0,L1,L2,L3,iter+1, csize, maxIter);
   }
   if (dr!=0 && not_empty(R0,R1,R2,R3)){
     #if SKEL__SAVE_RECTS
       add_rect(R0,R1,R2,R3);
     #endif
-    frags = merge_frags(frags, trace_skeleton(R0,R1,R2,R3,iter+1),sx,dr);
+    frags = merge_frags(
+    	frags,
+    	trace_skeleton(R0,R1,R2,R3,iter+1, csize, maxIter),
+    	sx,
+    	dr
+    );
   }
 
   if (mi == -1 && mj == -1){ // splitting failed! do the recursive bottom instead
@@ -624,7 +625,7 @@ void print_bitmap(){
 
 polyline_t* polylines = NULL;
 
-void trace(char* img, int w, int h){
+void trace(char* img, int w, int h, int csize, int maxIter){
   W = w;
   H = h;
   if (im){
@@ -638,8 +639,8 @@ void trace(char* img, int w, int h){
   // print_bitmap();
   thinning_zs();
   // print_bitmap();
-  
-  polylines = trace_skeleton(0,0,W,H,0);
+
+  polylines = trace_skeleton(0,0,W,H,0, csize, maxIter);
   // print_polylines(polylines);
 
   // free(im);
