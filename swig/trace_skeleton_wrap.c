@@ -2666,7 +2666,7 @@ static swig_module_info swig_module = {swig_types, 1, 0, 0, 0, 0};
 #define SWIG_as_voidptrptr(a) ((void)SWIG_as_voidptr(*a),(void**)(a)) 
 
 
- void trace(char* im, int w, int h);
+ void trace(char* im, int w, int h, int csize, int maxIter);
  int pop_point();
  int len_polyline();
  
@@ -2959,6 +2959,8 @@ SWIGINTERN PyObject *_wrap_trace(PyObject *SWIGUNUSEDPARM(self), PyObject *args)
   char *arg1 = (char *) 0 ;
   int arg2 ;
   int arg3 ;
+  int arg4 ;
+  int arg5 ;
   int res1 ;
   char *buf1 = 0 ;
   int alloc1 = 0 ;
@@ -2966,9 +2968,13 @@ SWIGINTERN PyObject *_wrap_trace(PyObject *SWIGUNUSEDPARM(self), PyObject *args)
   int ecode2 = 0 ;
   int val3 ;
   int ecode3 = 0 ;
-  PyObject *swig_obj[3] ;
+  int val4 ;
+  int ecode4 = 0 ;
+  int val5 ;
+  int ecode5 = 0 ;
+  PyObject *swig_obj[5] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "trace", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "trace", 5, 5, swig_obj)) SWIG_fail;
   res1 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf1, NULL, &alloc1);
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "trace" "', argument " "1"" of type '" "char *""'");
@@ -2984,7 +2990,17 @@ SWIGINTERN PyObject *_wrap_trace(PyObject *SWIGUNUSEDPARM(self), PyObject *args)
     SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "trace" "', argument " "3"" of type '" "int""'");
   } 
   arg3 = (int)(val3);
-  trace(arg1,arg2,arg3);
+  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "trace" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = (int)(val4);
+  ecode5 = SWIG_AsVal_int(swig_obj[4], &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "trace" "', argument " "5"" of type '" "int""'");
+  } 
+  arg5 = (int)(val5);
+  trace(arg1,arg2,arg3,arg4,arg5);
   resultobj = SWIG_Py_Void();
   if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
   return resultobj;
