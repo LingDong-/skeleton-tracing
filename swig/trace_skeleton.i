@@ -1,19 +1,22 @@
  /* trace_skeleton.i */
  %module trace_skeleton
  %{
- void trace(char* im, int w, int h);
+ void trace(char* im, int w, int h, int csize, int maxIter);
  int pop_point();
  int len_polyline();
  %}
- 
- void trace(char* im, int w, int h);
+
+ void trace(char* im, int w, int h, int csize, int maxIter);
  int pop_point();
  int len_polyline();
 
 %pythoncode %{
-def from_list(arr,w,h):
+csizeDefault = 10
+maxIterDefault = 999
+
+def from_list(arr, w, h, csize=csizeDefault, maxIter=maxIterDefault):
 	im = "".join(['\0' if x == 0 else '\1' for x in arr])
-	trace(im,w,h)
+	trace(im, w, h, csize, maxIter)
 	P = [];
 	while (len_polyline() != -1):
 		P.append([])
@@ -25,14 +28,14 @@ def from_list(arr,w,h):
 			P[-1].append((x,y))
 	return P
 
-def from_list2d(arr):
+def from_list2d(arr, csize=csizeDefault, maxIter=maxIterDefault):
 	if (len(arr) == 0):
 		return []
 	flatten = lambda l: [item for sublist in l for item in sublist]
-	return from_list(flatten(arr),len(arr[0]),len(arr))
+	return from_list(flatten(arr), len(arr[0]), len(arr), csize, maxIter)
 
-def from_numpy(arr):
+def from_numpy(arr, csize=csizeDefault, maxIter=maxIterDefault):
 	w = arr.shape[1]
 	h = arr.shape[0]
-	return from_list(list(arr.flatten()),w,h)
+	return from_list(list(arr.flatten()), w, h, csize, maxIter)
 %}
