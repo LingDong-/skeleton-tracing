@@ -15,7 +15,7 @@ csizeDefault = 10
 maxIterDefault = 999
 
 def from_list(arr, w, h, csize=csizeDefault, maxIter=maxIterDefault):
-	im = "".join(['\0' if x == 0 else '\1' for x in arr])
+	im = str(bytes(arr), 'ascii')
 	trace(im, w, h, csize, maxIter)
 	P = [];
 	while (len_polyline() != -1):
@@ -37,5 +37,6 @@ def from_list2d(arr, csize=csizeDefault, maxIter=maxIterDefault):
 def from_numpy(arr, csize=csizeDefault, maxIter=maxIterDefault):
 	w = arr.shape[1]
 	h = arr.shape[0]
-	return from_list(list(arr.flatten()), w, h, csize, maxIter)
+	arr[arr > 0] = 1
+	return from_list(arr.flatten().tolist(), w, h, csize, maxIter)
 %}
