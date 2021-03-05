@@ -12,7 +12,7 @@ Uses numpy. This example uses opencv to read/display images, but the library its
 It also tries to use skimage's faster raster thinning by default, and falls back to homemade implementation if skimage is not installed.
 
 ```python
-from traceSkeleton import *
+from trace_skeleton import *
 import cv2
 import random
   
