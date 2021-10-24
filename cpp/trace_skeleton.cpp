@@ -24,6 +24,7 @@
 #define CHUNK_SIZE 10           // the chunk size
 #define SAVE_RECTS 1            // additionally save bounding rects of chunks (for visualization)
 #define MAX_ITER 999            // maximum number of iterations
+#define MODIFIED_ZS 1           // modified Zs thinning algorithm
 
 
 struct skeleton_tracer_t {
@@ -279,10 +280,23 @@ struct skeleton_tracer_t {
           (p6 == 0 && p7 == 1) + (p7 == 0 && p8 == 1) +
           (p8 == 0 && p9 == 1) + (p9 == 0 && p2 == 1);
         int B  = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
-        int m1 = iter == 0 ? (p2 * p4 * p6) : (p2 * p4 * p8);
-        int m2 = iter == 0 ? (p4 * p6 * p8) : (p2 * p6 * p8);
-        if (A == 1 && (B >= 2 && B <= 6) && m1 == 0 && m2 == 0)
+        
+        int m2 = iter == 0 ? (p2 * p4 * p6) : (p2 * p4 * p8);
+        int m3 = iter == 0 ? (p4 * p6 * p8) : (p2 * p6 * p8);
+        
+#if MODIFIED_ZS
+        int C = (p2 == 0 && (p3 == 1 || p4 == 1)) +
+          (p4 == 0 && (p5 == 1 || p6 == 1)) +
+          (p6 == 0 && (p7 == 1 || p8 == 1)) +
+          (p8 == 0 && (p9 == 1 || p2 == 1));
+        int m0 = iter == 0 ? (i + j) % 2 == 0 : (i + j) % 2 != 0;
+        int m1 = iter == 0 ? B >= 2 && B <= 7 : B >= 1 && B <= 7;
+        if (m0 == 1 && C == 1 && m1 == 1 && m2 == 0 && m3 == 0)
           im[i*W+j] |= 2;
+#else
+        if (A == 1 && (B >= 2 && B <= 6) && m2 == 0 && m3 == 0)
+          im[i*W+j] |= 2;
+#endif
       }
     }
     for (int i = 0; i < H*W; i++){
