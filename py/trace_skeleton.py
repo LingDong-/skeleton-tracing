@@ -4,6 +4,7 @@
 # Lingdong Huang 2020
 
 import numpy as np
+from numba import jit
 
 # binary image thinning (skeletonization) in-place.
 # implements Zhang-Suen algorithm.
@@ -21,6 +22,7 @@ def thinningZS(im):
   return im
 
 # 1 pass of Zhang-Suen thinning 
+@jit(nopython=True,cache=True)
 def thinningZSIteration(im, iter):
   marker = np.zeros(im.shape,np.uint8);
   for i in range(1,im.shape[0]-1):
@@ -59,7 +61,7 @@ def thinning(im):
 
 #check if a region has any white pixel
 def notEmpty(im, x, y, w, h):
-  return np.sum(im) > 0
+  return np.any(im[y:y+h, x:x+w])
 
 
 # merge ith fragment of second chunk to first chunk
@@ -147,6 +149,7 @@ def mergeFrags(c0, c1, sx, dr):
 # @param h    height of chunk
 # @return     the polyline fragments
 # 
+@jit(nopython=True,cache=True)
 def chunkToFrags(im, x, y, w, h):
   frags = []
   on = False; # to deal with strokes thicker than 1px
@@ -177,7 +180,7 @@ def chunkToFrags(im, x, y, w, h):
     lj = j;
   
   if (len(frags) == 2): # probably just a line, connect them
-    f = [frags[0][0],frags[1][0]];
+    f = [[frags[0][0][0], frags[0][0][1]], [frags[1][0][0], frags[1][0][1]]];
     frags.pop(0);
     frags.pop(0);
     frags.append(f);
@@ -203,7 +206,8 @@ def chunkToFrags(im, x, y, w, h):
 
     if (mi != -1):
       for i in range(len(frags)):
-        frags[i][1]=[mj,mi]
+        frags[i][1][0]=mj
+        frags[i][1][1]=mi
   return frags;
 
 
@@ -243,10 +247,8 @@ def traceSkeleton(im, x, y, w, h, csize, maxIter, rects):
       if (im[i,x]  or im[(i-1),x]  or im[i,x+w-1]  or im[(i-1),x+w-1]):
         continue
       
-      s = 0;
-      for j in range(x,x+w):
-        s += im[i,j];
-        s += im[(i-1),j];
+      # Optimized: use numpy slicing to sum two rows at once
+      s = np.sum(im[i-1:i+1, x:x+w])
       
       if (s < ms):
         ms = s; mi = i;
@@ -260,10 +262,9 @@ def traceSkeleton(im, x, y, w, h, csize, maxIter, rects):
       if (im[y,j] or im[(y+h-1),j] or im[y,j-1] or im[(y+h-1),j-1]):
         continue
       
-      s = 0;
-      for i in range(y,y+h):
-        s += im[i,j];
-        s += im[i,j-1];
+      # Optimized: use numpy slicing to sum two columns at once
+      s = np.sum(im[y:y+h, j-1:j+1])
+      
       if (s < ms):
         ms = s;
         mi = -1; # horizontal seam is defeated
